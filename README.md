@@ -1,5 +1,5 @@
 # flashCourse_weiban
-微班刷课脚本模板  
+微伴刷课脚本模板  
 -
 使用方法：  
 1. 配置好Python3环境  
