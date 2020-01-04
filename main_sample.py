@@ -1,14 +1,16 @@
 import requests
 import json
 import time
+import random
 
 sleep_time = 0.25
 sleep_time_exam = 1
+sleep_time_exam_random_range = 3
 
 # 以下代码是为2019 UIC 军训安全教育课程设计的，如要用到其他课程中请注意courseId和projectId
 # 打开chrome,随便你用什么手段,查到cookie acw_tc,填下去
 cookies = dict()
-cookies['acw_tc'] = '2760827e15771171783102186e179efe9ca11755f05c900c7b1987611ad16f'
+cookies['acw_tc'] = '2760826011781487134011645eff949d618c3112a10990f7805bd053f3d524'
 #cookies['Hm_lvt_a371a0af679e5ae55fe240040f35942e'] = '1578093784'
 #cookies['Hm_lpvt_a371a0af679e5ae55fe240040f35942e'] = '1578093784'
 
@@ -16,14 +18,13 @@ cookies['acw_tc'] = '2760827e15771171783102186e179efe9ca11755f05c900c7b1987611ad
 # 然后进入课程页面
 # 在抓到的文件中选择listCourse.do?timestamp=xxx这个文件,xxx表示一串数字
 # 选择Header,滚动到最下方,找到FromData,按下view source,复制到下面
-data = 'userProjectId=99fdb584-8da0-4877-b60e-081c6d216c78&chooseType=3&tenantCode=122082211&name=&userId=d412345-2d20-1111-2222-082c3123fd44&token=1234523d-cf29-4b0f-90a2-912345cdb412'
+data = 'userProjectId=911b1ab5-bf0d-4138-ad6e-fed9e8e71c8b&chooseType=3&tenantCode=112088801&name=&userId=61202cfe-b4df-4aa8-81e4-99728c45611d&token=69ad41e5-cb11-44b4-b164-e664b95f7a82'
 
 userId = data[data.index('userId=')+len('userId='):data.index('&token')]
 tenantCode = data[data.index('tenantCode=')+len('tenantCode='):data.index('&name')]
 token = data[data.index('token=')+len('token='):]
 
-exam_data = 'userExamPlanId=126b6524-6403-4b89-ba94-a5ce365a68fe&tenantCode=%s&userId=%s&token=%s' % (tenantCode, userId, token)
-exam_data = exam_data.encode()
+
 
 
 data_ent = data + '&courseId=...'
@@ -179,7 +180,15 @@ with open('answer.json', 'w') as f:
     f.write(json.dumps(right_answer))
 '''
 
-input('是否进入考试？（回车确认）')
+#input('是否进入考试？（回车确认）')
+
+
+# 获取examPlanId
+r_id = s.post('https://weiban.mycourse.cn/pharos/exam/listPlan.do?timestamp='+get_time(), data=data)
+examPlanId = r_id.json()['data'][0]['id']
+
+exam_data = 'userExamPlanId=%s&tenantCode=%s&userId=%s&token=%s' % (examPlanId, tenantCode, userId, token)
+exam_data = exam_data.encode()
 
 # 进入考试
 with open('answer.json', 'r') as f:
@@ -197,18 +206,18 @@ for question in question_list:
     question_id = question['id']
     answer_id = right_answer[question_id]
 
-    do_data = 'userExamPlanId=126b6524-6403-4b89-ba94-a5ce365a68fe&questionId=%s&useTime=1&answerIds=%s&tenantCode=%s&userId=%s&token=%s' % (question_id, answer_id, tenantCode, userId, token)
+    do_data = 'userExamPlanId=%s&questionId=%s&useTime=1&answerIds=%s&tenantCode=%s&userId=%s&token=%s' % (examPlanId, question_id, answer_id, tenantCode, userId, token)
     do_data = do_data.encode()
 
     print('正在做第%d题' % n)
     resp_do = s.post('https://weiban.mycourse.cn/pharos/exam/recordQuestion.do?timestamp='+get_time(), data=do_data)
 
     print('服务器返回状态%s' % str(resp_do.content))
-    time.sleep(sleep_time_exam)
+    time.sleep(sleep_time_exam + random.randint(0, sleep_time_exam_random_range))
 
     n += 1
 
-exam_finish_data = 'userExamPlanId=126b6524-6403-4b89-ba94-a5ce365a68fe&tenantCode=%s&userId=%s&token=%s' % (tenantCode, userId, token)
+exam_finish_data = 'userExamPlanId=%s&tenantCode=%s&userId=%s&token=%s' % (examPlanId, tenantCode, userId, token)
 exam_finish_data = exam_finish_data.encode()
 
 print('开始提交考试')
