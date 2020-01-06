@@ -3,14 +3,16 @@ import json
 import time
 import random
 
-sleep_time = 0.25
-sleep_time_exam = 1
-sleep_time_exam_random_range = 3
+sleep_time = 0.05
+sleep_time_exam = 3
+sleep_time_exam_random_range = 6
 
 # 以下代码是为2019 UIC 军训安全教育课程设计的，如要用到其他课程中请注意courseId和projectId
 # 打开chrome,随便你用什么手段,查到cookie acw_tc,填下去
 cookies = dict()
-cookies['acw_tc'] = '2760827915781535321134534e5764f397eeb4470019168b411142ecdb1a94'
+cookies['acw_tc'] = '2760829315782675543511111e6b43d4d95a573aba8bd6e686ef79e6aef13e'
+print('输入Cookies')
+cookies['acw_tc'] = input()
 #cookies['Hm_lvt_a371a0af679e5ae55fe240040f35942e'] = '1578093784'
 #cookies['Hm_lpvt_a371a0af679e5ae55fe240040f35942e'] = '1578093784'
 
@@ -18,7 +20,9 @@ cookies['acw_tc'] = '2760827915781535321134534e5764f397eeb4470019168b411142ecdb1
 # 然后进入课程页面
 # 在抓到的文件中选择listCourse.do?timestamp=xxx这个文件,xxx表示一串数字
 # 选择Header,滚动到最下方,找到FromData,按下view source,复制到下面
-data = 'userProjectId=a1114cff-1111-4449-a38b-71114bb711bf&chooseType=3&tenantCode=123088801&name=&userId=2b11110f-0d8a-4ace-8fda-eab4f7f29286&token=1119c813-9f69-4111-a4b8-8b56b511da96'
+data = 'userProjectId=15f3c6d0-961e-4a22-b239-4d1752de1070&chooseType=3&tenantCode=312088801&name=&userId=3726fedf-41e4-478c-a8dc-ad9d11da5999&token=2d165961-551a-41c1-91ec-ddea6e834455'
+print('输入data')
+data = input()
 
 userId = data[data.index('userId=')+len('userId='):data.index('&token')]
 tenantCode = data[data.index('tenantCode=')+len('tenantCode='):data.index('&name')]
@@ -190,6 +194,9 @@ print(examPlanId)
 
 exam_data = 'userExamPlanId=%s&tenantCode=%s&userId=%s&token=%s' % (examPlanId, tenantCode, userId, token)
 exam_data = exam_data.encode()
+
+# 准备考试
+resp_pre = s.post('https://weiban.mycourse.cn/pharos/exam/preparePaper.do?timestamp='+get_time(), exam_data)
 
 # 进入考试
 with open('answer.json', 'r') as f:
