@@ -27,7 +27,7 @@ headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) li
 
 def super_sleep(t):
     for i in range(t):
-        print('\r睡眠%s/%s' % (i+1, t), end='')
+        print('\r睡眠%s/%s %s' % (i+1, t, UserNo), end='')
         time.sleep(1)
         
 
@@ -166,7 +166,7 @@ exam_val_tmp = '''<?xml version="1.0"?>
 '''
 final_step_tmp = 'http://www.sjhtbook.cn/psaveN.aspx?exmNo=_exmNo_&stuno=_stuno_&exmClsId=_exmClsId_&exmType=False&exmPaperLock=False&clsName=岭南师范2020春季军事理论课&exmName=_exmName_'
 #&clsName=%E5%B2%AD%E5%8D%97%E5%B8%88%E8%8C%832020%E6%98%A5%E5%AD%A3%E5%86%9B%E4%BA%8B%E7%90%86%E8%AE%BA%E8%AF%BE&exmName=%E7%BB%83%E4%B9%A0%E4%B8%80
-real_fin_url_tmp = 'http://www.sjhtbook.cn/aspAjax/AjaxCheckExam.aspx?stuno=_stuno_&exmClsId=_exmClsId_&cur_id=&islookscore=1&type=getresult'
+real_fin_url_tmp = 'http://www.sjhtbook.cn/aspAjax/AjaxCheckExam.aspx?stuno=_stuno_&exmClsId=_exmClsId_&cur_id=&islookscore=_islockscore_&type=getresult'
 abandon_data = '''<?xml version="1.0"?>
 <sendPaper>
 	<ExmClsId>_ExmClsId_</ExmClsId>
@@ -226,8 +226,8 @@ for a in examlist:
         now_data = exam_question_data_tmp.replace('_ExmClsId_', exmClsId).replace('_ExmStuNo_', stu_no)
 
         #随机错答案
-        if jsondata[question] == 'A' and random.randint(1,100) > 75:
-            json_answer = 'B'
+        if (jsondata[question] == 'A' or jsondata[question] == 'B') and random.randint(1,100) > 75:
+            json_answer = 'C'
             print('我随机制造了一个错误答案')
         else:
             json_answer = jsondata[question]
@@ -262,7 +262,11 @@ for a in examlist:
 
 
     print('这真的是最后一步') # get result，可能可以省略
-    real_fin_resp = s.get(real_fin_url_tmp.replace('_stuno_', stu_no).replace('_exmClsId_',exmClsId))
+    if not exmNo == 'SJ000008':
+        real_fin_resp = s.get(real_fin_url_tmp.replace('_stuno_', stu_no).replace('_exmClsId_',exmClsId).replace('_islockscore_','1'))
+    else:
+        real_fin_resp = s.get(real_fin_url_tmp.replace('_stuno_', stu_no).replace('_exmClsId_',exmClsId).replace('_islockscore_','0'))
+        print('尝试锁定成绩')
     #print(real_fin_resp.content.decode())
 
     print('安全休息')
@@ -271,3 +275,5 @@ for a in examlist:
     if exmNo == 'SJ000008':
         exit()
     super_sleep(100+random.randint(1,60))
+
+print('%s正常完成'% UserNo)
