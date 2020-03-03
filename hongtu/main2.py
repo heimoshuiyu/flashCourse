@@ -274,6 +274,6 @@ for a in examlist:
         exit()
     if exmNo == 'SJ000008':
         exit()
-    super_sleep(100+random.randint(1,60))
+    super_sleep(100+random.randint(1,1000))
 
 print('%s正常完成'% UserNo)
