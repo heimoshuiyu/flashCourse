@@ -24,7 +24,6 @@ headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) li
 'Content-Type': 'application/x-www-form-urlencoded',
 'Origin': 'http://www.sjhtbook.cn'}
 
-# cookies = {'ASP.NET_SessionId': 'ukgbalkqf2juh4ihirgt4nvm'}
 
 def super_sleep(t):
     for i in range(t):
@@ -55,7 +54,6 @@ s = requests.Session()
 s.mount('http://', HTTPAdapter(max_retries=RETRY))
 s.mount('https://', HTTPAdapter(max_retries=RETRY))
 s.headers.update(headers)
-#s.cookies.update(cookies)
 
 # 输入用户名密码
 print('输入数据时，请不要有多余的空格或其他字符')
