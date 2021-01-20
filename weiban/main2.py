@@ -220,9 +220,11 @@ def get_time():
     return str(int(time.time() - 1))
 
 def main():
+    hint = input('输入学号: ')
     weiban = Weiban()
     weiban.flash()
     weiban.flashExam()
+    print(hint, '完成')
 
 if __name__ == '__main__':
     main()
