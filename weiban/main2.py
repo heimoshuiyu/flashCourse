@@ -17,8 +17,8 @@ with open('answer.json', 'r') as f:
 
 class SleepSetting:
     def __init__(self):
-        self.sleep_between_course = 0.1
-        self.sleep_begin_and_end = 0.039
+        self.sleep_between_course = 1
+        self.sleep_begin_and_end = 0.39
         self.sleep_between_question = 3
         self.sleep_question_range = 6
 _sleepSetting = SleepSetting()
