@@ -5,12 +5,11 @@ import random
 
 # 预定义头
 headers = dict()
-headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'
-headers['Origin'] = 'http://weiban.mycourse.cn'
-headers['Referer'] = 'http://weiban.mycourse.cn/'
-headers['Content-Type'] = 'application/x-www-form-urlencoded'
-headers['Sec-Fetch-Site'] = 'same-origin'
-headers['Sec-Fetch-Mod'] = 'cors'
+headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0'
+headers['Host'] = 'weiban.mycourse.cn'
+headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+headers['Accept-Language'] = 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2'
+headers['Accept-Encoding'] = 'gzip, deflate, br'
 
 with open('answer.json', 'r') as f:
     right_answer = json.loads(f.read())
@@ -18,7 +17,7 @@ with open('answer.json', 'r') as f:
 class SleepSetting:
     def __init__(self):
         self.sleep_between_course = 1
-        self.sleep_begin_and_end = 0.39
+        self.sleep_begin_and_end = 39
         self.sleep_between_question = 3
         self.sleep_question_range = 6
 _sleepSetting = SleepSetting()
@@ -33,7 +32,6 @@ class Weiban:
         # 预处理cookies
         if cookies is None:
             cookies = dict()
-            cookies['acw_tc'] = input('输入Cookies["acw_tc"]: ')
         self.cookies = cookies
 
         # 预处理data
@@ -55,7 +53,7 @@ class Weiban:
         self.urlListCategory = 'https://weiban.mycourse.cn/pharos/usercourse/listCategory.do?timestamp=%s'
         self.urlListCourse = 'https://weiban.mycourse.cn/pharos/usercourse/listCourse.do?timestamp=%s'
         self.urlStudy = 'https://weiban.mycourse.cn/pharos/usercourse/study.do?timestamp=%s'
-        self.urlFinish = 'https://weiban.mycourse.cn/pharos/usercourse/finish.do?callback=jQuery16408245967680834043_1611063154388&userCourseId=%s&tenantCode=%s'
+        self.urlFinish = 'https://weiban.mycourse.cn/pharos/usercourse/finish.do?callback=jQuery16408245967680834043_1611063154388&userCourseId=%s&tenantCode=%s&_=%s'
         self.urlListexam = 'https://weiban.mycourse.cn/pharos/exam/listPlan.do?timestamp=%s'
         self.urlPrepareExam = 'https://weiban.mycourse.cn/pharos/exam/preparePaper.do?timestamp=%s'
         self.urlStartExam = 'https://weiban.mycourse.cn/pharos/exam/startPaper.do?timestamp=%s'
@@ -66,6 +64,12 @@ class Weiban:
         self.s = requests.Session()
         self.s.headers.update(headers)
         requests.utils.add_dict_to_cookiejar(self.s.cookies, self.cookies)
+
+    def sleep(self, t):
+        for i in range(t):
+            print('%d/%d' % (i+1, t), end='\r')
+            time.sleep(1)
+        print()
 
     def getCategory(self):
         url = self.urlListCategory % get_time()
@@ -124,23 +128,25 @@ class Weiban:
                 }
         resp = self.s.post(url=url, data=data)
         status = resp.json()['code']
-        print('返回状态代码%s' % status, end='')
+        print('返回状态代码%s' % status)
         
-        time.sleep(self.sleepSetting.sleep_begin_and_end)
+        self.sleep(self.sleepSetting.sleep_begin_and_end)
 
         url = self.urlFinish % (
                 course['userCourseId'],
-                self.data['tenantCode']
+                self.data['tenantCode'],
+                int(time.time() * 1000)
                 )
         resp = self.s.get(url=url)
         print('结束HTTP状态码%s' % resp.status_code)
+        return resp
 
     def flash(self):
         self.getCategory()
         self.fetchUnFinishedCourse()
         for course in self.unFinishedCourseList:
             self.doCourse(course)
-            time.sleep(self.sleepSetting.sleep_between_course)
+            self.sleep(self.sleepSetting.sleep_between_course)
 
     def flashExam(self):
         url = self.urlListexam % get_time()
@@ -185,7 +191,7 @@ class Weiban:
             answer_id = right_answer[question_id]
 
             random_use_time = self.sleepSetting.sleep_between_question+random.randint(0, self.sleepSetting.sleep_question_range)
-            time.sleep(random_use_time)
+            self.sleep(random_use_time)
 
             url = self.urlRecordQuestion % get_time()
             data = {
@@ -199,7 +205,7 @@ class Weiban:
                     }
             resp = self.s.post(url=url, data=data)
             status = resp.json()['code']
-            print('正在做第%d题，状态%s\r' % (n, status), end='')
+            print('正在做第%d题，状态%s' % (n, status), end='\r')
             n += 1
         print('开始提交考试')
         url = self.urlFinishExam % get_time()
