@@ -144,8 +144,11 @@ class Weiban:
     def flash(self):
         self.getCategory()
         self.fetchUnFinishedCourse()
+        finishedCoursesCounter = 0
         for course in self.unFinishedCourseList:
             self.doCourse(course)
+            finishedCoursesCounter += 1
+            print('状态 已完成: %s, 剩余: %s' % (finishedCoursesCounter, len(self.unFinishedCourseList)))
             self.sleep(self.sleepSetting.sleep_between_course)
 
     def flashExam(self):
