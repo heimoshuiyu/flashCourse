@@ -205,6 +205,7 @@ class Weiban:
                     'tenantCode': self.data['tenantCode'],
                     'userId': self.data['userId'],
                     'token': self.data['token'],
+                    'examPlanId': exam['examPlanId'],
                     }
             resp = self.s.post(url=url, data=data)
             status = resp.json()['code']
